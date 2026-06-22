@@ -73,6 +73,7 @@ def create_ticket(data: FraudTicketRequest):
         "created_at": str(datetime.now())
     }
 
+<<<<<<< HEAD
 # --------------------
 # Webhook Endpoint
 # --------------------
@@ -84,6 +85,8 @@ async def webhook(data: dict):
     return {
         "status": "received"
     }
+=======
+>>>>>>> ded0078e525801fd177ba0044284da4ebe437e9d
 
 @app.get("/")
 def home():
