@@ -19,16 +19,17 @@ def verify_otp(data: OTPRequest):
 
     if data.otp == "123456":
         return {
+            "verified": True,
             "status": "success",
             "message": "OTP verified",
             "customer": data.customer_name
         }
 
     return {
+        "verified": False,
         "status": "failed",
         "message": "Invalid OTP"
     }
-
 
 # --------------------
 # Freeze Card
