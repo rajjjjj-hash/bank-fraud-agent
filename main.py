@@ -5,30 +5,38 @@ import random
 
 app = FastAPI(title="Fraud Agent API")
 
-# --------------------
-# OTP Verification
-# --------------------
 
 class OTPRequest(BaseModel):
     customer_name: str
     customer_id: str
     otp: str
 
+
 @app.post("/verify-otp")
 def verify_otp(data: OTPRequest):
 
-    if data.otp == "123456":
+    print("VERIFY OTP CALLED")
+    print(f"Customer Name: {data.customer_name}")
+    print(f"Customer ID: {data.customer_id}")
+    print(f"OTP: {data.otp}")
+
+    if str(data.otp).strip() == "123456":
         return {
-            "success": True
+            "success": True,
+            "verified": True,
+            "status": "success",
+            "result": "success",
+            "message": "OTP verified"
         }
 
     return {
-        "success": False
+        "success": False,
+        "verified": False,
+        "status": "failed",
+        "result": "failed",
+        "message": "Invalid OTP"
     }
 
-# --------------------
-# Freeze Card
-# --------------------
 
 class FreezeCardRequest(BaseModel):
     customer_name: str
@@ -36,21 +44,19 @@ class FreezeCardRequest(BaseModel):
     card_type: str
     reason: str
 
+
 @app.post("/freeze-card")
 def freeze_card(data: FreezeCardRequest):
 
     reference_id = f"CARD-{random.randint(10000,99999)}"
 
     return {
+        "success": True,
         "status": "success",
         "reference_id": reference_id,
         "message": "Card frozen successfully"
     }
 
-
-# --------------------
-# Fraud Ticket
-# --------------------
 
 class FraudTicketRequest(BaseModel):
     customer_name: str
@@ -58,34 +64,30 @@ class FraudTicketRequest(BaseModel):
     risk_level: str
     summary: str
 
+
 @app.post("/create-ticket")
 def create_ticket(data: FraudTicketRequest):
 
     ticket_id = f"FRD-{random.randint(100000,999999)}"
 
     return {
+        "success": True,
         "status": "success",
         "ticket_id": ticket_id,
         "created_at": str(datetime.now())
     }
 
 
-# --------------------
-# Webhook Endpoint
-# --------------------
-
 @app.post("/webhook")
 async def webhook(data: dict):
-    print("Webhook received:", data)
+
+    print("WEBHOOK RECEIVED")
+    print(data)
 
     return {
         "status": "received"
     }
 
-
-# --------------------
-# Home
-# --------------------
 
 @app.get("/")
 def home():
