@@ -17,6 +17,11 @@ class OTPRequest(BaseModel):
 @app.post("/verify-otp")
 def verify_otp(data: OTPRequest):
 
+    print("========== VERIFY OTP CALLED ==========")
+    print("Customer Name:", data.customer_name)
+    print("Customer ID:", data.customer_id)
+    print("OTP:", data.otp)
+
     if data.otp == "123456":
         return {
             "verified": True,
@@ -30,7 +35,6 @@ def verify_otp(data: OTPRequest):
         "status": "failed",
         "message": "Invalid OTP"
     }
-
 # --------------------
 # Freeze Card
 # --------------------
