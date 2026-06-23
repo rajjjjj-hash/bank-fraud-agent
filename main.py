@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
@@ -10,21 +10,32 @@ app = FastAPI(title="Fraud Agent API")
 # OTP Verification
 # ==========================
 
-class OTPRequest(BaseModel):
-    customer_name: Optional[str] = None
-    customer_id: Optional[str] = None
-    otp: str
-
 @app.post("/verify-otp")
-def verify_otp(data: OTPRequest):
+async def verify_otp(request: Request):
+
+    # Accept data from ANY format Bolna sends
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
+
+    # Also check query params and form data
+    params = dict(request.query_params)
+    body = {**params, **body}  # body overrides params
+
+    otp = str(body.get("otp", "")).strip()
+    customer_name = body.get("customer_name", "")
+    customer_id = body.get("customer_id", "")
 
     print("========== VERIFY OTP CALLED ==========")
-    print(f"Customer Name : {data.customer_name}")
-    print(f"Customer ID   : {data.customer_id}")
-    print(f"OTP           : {data.otp}")
+    print(f"Raw body     : {body}")
+    print(f"Customer Name: {customer_name}")
+    print(f"Customer ID  : {customer_id}")
+    print(f"OTP          : {otp}")
     print("========================================")
 
-    if str(data.otp).strip() == "123456":
+    if otp == "123456":
         return {
             "success": True,
             "verified": True,
@@ -38,28 +49,29 @@ def verify_otp(data: OTPRequest):
         "verified": False,
         "status": "failed",
         "result": "failed",
-        "message": "Invalid OTP. Please try again."
+        "message": "Invalid OTP"
     }
 
 # ==========================
 # Freeze Card
 # ==========================
 
-class FreezeCardRequest(BaseModel):
-    customer_name: Optional[str] = None
-    card_last_four: Optional[str] = None
-    card_type: Optional[str] = None
-    reason: Optional[str] = None
-
 @app.post("/freeze-card")
-def freeze_card(data: FreezeCardRequest):
+async def freeze_card(request: Request):
+
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
+
+    params = dict(request.query_params)
+    body = {**params, **body}
 
     reference_id = f"CARD-{random.randint(10000, 99999)}"
 
     print("========== FREEZE CARD CALLED ==========")
-    print(f"Customer : {data.customer_name}")
-    print(f"Card     : {data.card_type} ending {data.card_last_four}")
-    print(f"Reason   : {data.reason}")
+    print(f"Raw body : {body}")
     print(f"Ref ID   : {reference_id}")
     print("=========================================")
 
@@ -74,22 +86,23 @@ def freeze_card(data: FreezeCardRequest):
 # Fraud Ticket
 # ==========================
 
-class FraudTicketRequest(BaseModel):
-    customer_name: Optional[str] = None
-    fraud_type: Optional[str] = None
-    risk_level: Optional[str] = None
-    summary: Optional[str] = None
-
 @app.post("/create-ticket")
-def create_ticket(data: FraudTicketRequest):
+async def create_ticket(request: Request):
+
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
+
+    params = dict(request.query_params)
+    body = {**params, **body}
 
     ticket_id = f"FRD-{random.randint(100000, 999999)}"
 
     print("========== CREATE TICKET CALLED ==========")
-    print(f"Customer   : {data.customer_name}")
-    print(f"Fraud Type : {data.fraud_type}")
-    print(f"Risk Level : {data.risk_level}")
-    print(f"Ticket ID  : {ticket_id}")
+    print(f"Raw body  : {body}")
+    print(f"Ticket ID : {ticket_id}")
     print("==========================================")
 
     return {
@@ -104,10 +117,16 @@ def create_ticket(data: FraudTicketRequest):
 # ==========================
 
 @app.post("/webhook")
-async def webhook(data: dict):
+async def webhook(request: Request):
+
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
 
     print("========== WEBHOOK RECEIVED ==========")
-    print(data)
+    print(body)
     print("=======================================")
 
     return {"status": "received"}
